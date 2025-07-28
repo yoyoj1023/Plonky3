@@ -7,120 +7,120 @@ Plonky3 is a toolkit which provides a set of primitives, such as polynomial comm
 
 For questions or discussions, please use the Telegram group, [t.me/plonky3](https://t.me/plonky3).
 
-## 🎓 Plonky3 學習教程 - 零知識證明系統開發完整指南
+## 🎓 Plonky3 Learning Tutorial - Complete Guide to Zero-Knowledge Proof System Development
 
-### 📚 教程概覽
+### 📚 Tutorial Overview
 
-在 `examples/` 目錄下，我們精心設計了一套完整的 Plonky3 學習課程，包含 **5 個循序漸進的習題**，帶領你從零基礎掌握零知識證明系統的開發。無論你是密碼學新手還是區塊鏈開發者，這套教程都能幫助你深入理解 STARK 證明系統的核心原理和實際應用。
+In the [`Plonky3/examples/`](https://github.com/yoyoj1023/web3/tree/main/127-Plonky3/examples) directory, we have carefully designed a complete Plonky3 learning course containing **5 progressive exercises** that guide you from zero foundation to mastering zero-knowledge proof system development. Whether you are a cryptography newcomer or a blockchain developer, this tutorial will help you deeply understand the core principles and practical applications of STARK proof systems.
 
-### 🎯 學習曲線設計
+### 🎯 Learning Curve Design
 
-我們的學習路徑採用**理論與實踐並重**的設計理念，每個習題都建立在前一個的基礎之上：
+Our learning path adopts a **theory and practice balanced** design philosophy, where each exercise builds upon the previous one:
 
-#### 📖 第一階段：理論基礎建立
-**[Lesson 1: FRI 基礎理論與手算練習](examples/lesson1-fri-fundamental-and-example/)**
-- **學習目標**：深入理解 FRI（Fast Reed-Solomon Interactive Oracle Proof）協議
-- **核心內容**：
-  - 多項式摺疊（Polynomial Folding）的數學原理
-  - 有限域運算的實際應用
-  - Verifier 與 Prover 互動機制
-  - 完整的手算驗證範例（在 𝔽₁₇ 中計算 f(x) = x³ + 2x² + 3x + 4）
-- **技能提升**：建立對零知識證明底層數學的直觀理解
-- **適合對象**：希望深入理解 FRI 協議運作機制的學習者
+#### 📖 Stage 1: Theoretical Foundation Building
+**[Lesson 1: FRI Fundamentals and Manual Calculation Practice](examples/lesson1-fri-fundamental-and-example/)**
+- **Learning Objectives**: Deep understanding of the FRI (Fast Reed-Solomon Interactive Oracle Proof) protocol
+- **Core Content**:
+  - Mathematical principles of Polynomial Folding
+  - Practical applications of finite field arithmetic
+  - Verifier and Prover interaction mechanisms
+  - Complete manual verification examples (computing f(x) = x³ + 2x² + 3x + 4 in 𝔽₁₇)
+- **Skill Enhancement**: Build intuitive understanding of the underlying mathematics of zero-knowledge proofs
+- **Target Audience**: Learners who want to deeply understand the operational mechanisms of the FRI protocol
 
-#### 🧠 第二階段：概念體系掌握
-**[Lesson 2: Plonky3 核心概念問答挑戰](examples/lesson2-plonky3-concept/)**
-- **學習目標**：全面掌握 Plonky3 的核心概念和術語
-- **核心內容**：
-  - AIR（代數中間表示）的設計原理
-  - 執行軌跡（Execution Trace）的生成與驗證
-  - FRI 協議在 STARK 中的關鍵作用
-  - 遞迴證明（Recursive Proofs）的應用場景
-  - Plonky3 模組化架構的優勢
-- **學習方式**：10道問答題 + 10道是非題，涵蓋從基礎定義到高級應用
-- **技能提升**：形成完整的零知識證明知識體系
-- **適合對象**：準備深入學習 Plonky3 實作的開發者
+#### 🧠 Stage 2: Conceptual Framework Mastery
+**[Lesson 2: Plonky3 Core Concepts Q&A Challenge](examples/lesson2-plonky3-concept/)**
+- **Learning Objectives**: Comprehensively master Plonky3's core concepts and terminology
+- **Core Content**:
+  - Design principles of AIR (Algebraic Intermediate Representation)
+  - Generation and verification of Execution Traces
+  - Critical role of FRI protocol in STARK
+  - Application scenarios for Recursive Proofs
+  - Advantages of Plonky3's modular architecture
+- **Learning Method**: 10 Q&A questions + 10 true/false questions, covering from basic definitions to advanced applications
+- **Skill Enhancement**: Form a complete zero-knowledge proof knowledge system
+- **Target Audience**: Developers preparing to deeply learn Plonky3 implementation
 
-#### 💻 第三階段：實作能力培養
-**[Lesson 3: 費波那契數列證明器實作](examples/lesson3-fibonacci-prover/)**
-- **學習目標**：掌握 Plonky3 基本開發流程，實現第一個完整的證明系統
-- **核心內容**：
-  - 定義 Plonky3 "Chip" 組件
-  - 生成執行軌跡（Execution Trace）
-  - 實作 AIR 約束（初始約束 + 轉移約束）
-  - 生成與驗證 STARK 證明
-- **實作重點**：
-  - 設計費波那契數列的 AIR 規格
-  - 處理邊界約束（F(0)=0, F(1)=1）
-  - 實現狀態轉移約束（F(n) = F(n-1) + F(n-2)）
-- **技能提升**：具備基本的零知識證明系統開發能力
-- **適合對象**：有 Rust 基礎，希望入門 Plonky3 開發的程式設計師
+#### 💻 Stage 3: Implementation Capability Development
+**[Lesson 3: Fibonacci Sequence Prover Implementation](examples/lesson3-fibonacci-prover/)**
+- **Learning Objectives**: Master the basic Plonky3 development workflow and implement the first complete proof system
+- **Core Content**:
+  - Define Plonky3 "Chip" components
+  - Generate Execution Traces
+  - Implement AIR constraints (initial constraints + transition constraints)
+  - Generate and verify STARK proofs
+- **Implementation Focus**:
+  - Design AIR specification for Fibonacci sequence
+  - Handle boundary constraints (F(0)=0, F(1)=1)
+  - Implement state transition constraints (F(n) = F(n-1) + F(n-2))
+- **Skill Enhancement**: Acquire basic zero-knowledge proof system development capabilities
+- **Target Audience**: Programmers with Rust foundation who want to get started with Plonky3 development
 
-#### 🔧 第四階段：系統架構進階
-**[Lesson 4: 通用加法處理器實作](examples/lesson4-universal-adder/)**
-- **學習目標**：學習處理狀態管理和可配置操作，為建構 ZK-VM 打下基礎
-- **核心內容**：
-  - 設計具有多個寄存器的 CPU 模型
-  - 使用選擇器（Selectors）實現動態操作選擇
-  - 實現 one-hot 編碼和約束驗證
-  - 處理複雜的狀態轉移邏輯
-- **實作重點**：
-  - 4個寄存器的狀態管理
-  - ADD 指令的完整實現
-  - 選擇器欄位的約束設計
-  - 從指令序列生成執行軌跡
-- **技能提升**：掌握複雜狀態系統的零知識證明設計
-- **適合對象**：希望建構虛擬機器證明系統的進階開發者
+#### 🔧 Stage 4: Advanced System Architecture
+**[Lesson 4: Universal Adder Processor Implementation](examples/lesson4-universal-adder/)**
+- **Learning Objectives**: Learn to handle state management and configurable operations, laying the foundation for ZK-VM construction
+- **Core Content**:
+  - Design CPU models with multiple registers
+  - Use Selectors to implement dynamic operation selection
+  - Implement one-hot encoding and constraint verification
+  - Handle complex state transition logic
+- **Implementation Focus**:
+  - State management of 4 registers
+  - Complete implementation of ADD instruction
+  - Constraint design for selector fields
+  - Generate execution traces from instruction sequences
+- **Skill Enhancement**: Master zero-knowledge proof design for complex state systems
+- **Target Audience**: Advanced developers who want to build virtual machine proof systems
 
-#### 🚀 第五階段：高級系統設計
-**[Lesson 5: 算術邏輯單元 (ALU) 實作](examples/lesson5-adder-subtractor-alu/)**
-- **學習目標**：掌握條件邏輯和操作碼處理，實現完整的 ALU 系統
-- **核心內容**：
-  - 操作選擇器（Operation Selectors）的設計
-  - 條件約束（Conditional Constraints）的實現
-  - 多指令類型的統一處理框架
-  - 模組化擴展現有系統
-- **實作重點**：
-  - 同時支援 ADD 和 SUB 指令
-  - 設計操作碼選擇機制
-  - 實現條件化的代數約束
-  - 處理複雜的狀態轉移邏輯
-- **技能提升**：具備設計複雜零知識虛擬機器的能力
-- **適合對象**：準備開發生產級 ZK-VM 系統的專業開發者
+#### 🚀 Stage 5: Advanced System Design
+**[Lesson 5: Arithmetic Logic Unit (ALU) Implementation](examples/lesson5-adder-subtractor-alu/)**
+- **Learning Objectives**: Master conditional logic and opcode handling, implement complete ALU system
+- **Core Content**:
+  - Design of Operation Selectors
+  - Implementation of Conditional Constraints
+  - Unified processing framework for multiple instruction types
+  - Modular extension of existing systems
+- **Implementation Focus**:
+  - Support both ADD and SUB instructions simultaneously
+  - Design opcode selection mechanisms
+  - Implement conditional algebraic constraints
+  - Handle complex state transition logic
+- **Skill Enhancement**: Acquire the ability to design complex zero-knowledge virtual machines
+- **Target Audience**: Professional developers preparing to develop production-grade ZK-VM systems
 
-### 📈 學習成果與能力進階
+### 📈 Learning Outcomes and Capability Advancement
 
-完成這套教程後，你將能夠：
+After completing this tutorial, you will be able to:
 
-🎯 **理論掌握**
-- 深入理解 FRI 協議的數學原理和實現細節
-- 掌握 STARK 證明系統的完整工作流程
-- 理解零知識證明的密碼學基礎
+🎯 **Theoretical Mastery**
+- Deep understanding of FRI protocol mathematical principles and implementation details
+- Master the complete workflow of STARK proof systems
+- Understand the cryptographic foundations of zero-knowledge proofs
 
-🛠️ **實作能力**
-- 獨立設計和實現 AIR 規格
-- 熟練使用 Plonky3 框架開發證明系統
-- 處理複雜的狀態管理和約束設計
+🛠️ **Implementation Capabilities**
+- Independently design and implement AIR specifications
+- Proficiently use the Plonky3 framework to develop proof systems
+- Handle complex state management and constraint design
 
-🏗️ **系統設計**
-- 設計可擴展的零知識虛擬機器架構
-- 實現高效的證明生成和驗證流程
-- 掌握模組化系統設計原則
+🏗️ **System Design**
+- Design scalable zero-knowledge virtual machine architectures
+- Implement efficient proof generation and verification processes
+- Master modular system design principles
 
-🚀 **實際應用**
-- 為區塊鏈擴容方案開發 ZK-Rollup 系統
-- 實現隱私保護的計算驗證方案
-- 建構高性能的零知識證明基礎設施
+🚀 **Practical Applications**
+- Develop ZK-Rollup systems for blockchain scaling solutions
+- Implement privacy-preserving computational verification schemes
+- Build high-performance zero-knowledge proof infrastructure
 
-### 🎓 開始學習
+### 🎓 Getting Started
 
-建議按照 Lesson 1 → Lesson 2 → Lesson 3 → Lesson 4 → Lesson 5 的順序進行學習。每個習題都包含詳細的說明文件、實作指導和思考題，確保你能夠紮實地掌握每一個概念。
+We recommend following the learning sequence: Lesson 1 → Lesson 2 → Lesson 3 → Lesson 4 → Lesson 5. Each exercise contains detailed documentation, implementation guidance, and reflection questions to ensure you can solidly grasp every concept.
 
-📝 **學習建議**：
-- 理論習題請務必親手計算，建立數學直觀
-- 程式習題請親自編寫代碼，避免直接複製
-- 完成每個習題後請思考擴展應用的可能性
-- 建議維護學習筆記，記錄重要概念和實作細節
+📝 **Learning Recommendations**:
+- For theoretical exercises, please calculate by hand to build mathematical intuition
+- For programming exercises, please write code yourself and avoid direct copying
+- After completing each exercise, consider possibilities for extended applications
+- Recommend maintaining learning notes to record important concepts and implementation details
 
 
 ## Status
