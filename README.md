@@ -11,7 +11,7 @@ For questions or discussions, please use the Telegram group, [t.me/plonky3](http
 
 ### 📚 Tutorial Overview
 
-In the [`Plonky3/examples/`](https://github.com/yoyoj1023/web3/tree/main/127-Plonky3/examples) directory, we have carefully designed a complete Plonky3 learning course containing **5 progressive exercises** that guide you from zero foundation to mastering zero-knowledge proof system development. Whether you are a cryptography newcomer or a blockchain developer, this tutorial will help you deeply understand the core principles and practical applications of STARK proof systems.
+In the [`Plonky3/examples/`](https://github.com/yoyoj1023/Plonky3/tree/main/examples) directory, we have carefully designed a complete Plonky3 learning course containing **5 progressive exercises** that guide you from zero foundation to mastering zero-knowledge proof system development. Whether you are a cryptography newcomer or a blockchain developer, this tutorial will help you deeply understand the core principles and practical applications of STARK proof systems.
 
 ### 🎯 Learning Curve Design
 
