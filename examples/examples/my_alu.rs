@@ -15,59 +15,59 @@ use p3_uni_stark::{StarkConfig, prove, verify};
 use rand::SeedableRng;
 use rand::rngs::SmallRng;
 
-/// 操作類型：支援加法和減法
+/// Operation types: supports addition and subtraction
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Opcode {
     ADD,
     SUB,
 }
 
-/// 表示一條 ALU 指令
+/// Represents an ALU instruction
 #[derive(Clone, Copy, Debug)]
 struct Instruction {
-    op: Opcode,     // 操作類型
-    dest: usize,    // 目標寄存器索引 0-3
-    src1: usize,    // 來源1寄存器索引 0-3
-    src2: usize,    // 來源2寄存器索引 0-3
+    op: Opcode,     // Operation type
+    dest: usize,    // Destination register index 0-3
+    src1: usize,    // Source1 register index 0-3
+    src2: usize,    // Source2 register index 0-3
 }
 
-/// 通用算術邏輯單元 Chip 結構
+/// Universal Arithmetic Logic Unit Chip structure
 pub struct AluChip;
 
-/// ALU 的列數（18 列）
-/// 4 個寄存器值 + 4*3 個寄存器選擇器 + 2 個操作選擇器
+/// Number of ALU columns (18 columns)
+/// 4 register values + 4*3 register selectors + 2 operation selectors
 const NUM_ALU_COLS: usize = 18;
 
-/// 表示 ALU 的一行數據
-/// 包含 4 個寄存器值、12 個寄存器選擇器和 2 個操作選擇器
+/// Represents one row of ALU data
+/// Contains 4 register values, 12 register selectors, and 2 operation selectors
 #[derive(Clone, Copy)]
 pub struct AluRow<F> {
-    // 寄存器值 (4 列)
+    // Register values (4 columns)
     pub r0: F,
     pub r1: F,
     pub r2: F,
     pub r3: F,
-    // 目標選擇器 (one-hot, 4 列)
+    // Destination selectors (one-hot, 4 columns)
     pub dest_0: F,
     pub dest_1: F,
     pub dest_2: F,
     pub dest_3: F,
-    // 來源1選擇器 (one-hot, 4 列)
+    // Source1 selectors (one-hot, 4 columns)
     pub src1_0: F,
     pub src1_1: F,
     pub src1_2: F,
     pub src1_3: F,
-    // 來源2選擇器 (one-hot, 4 列)
+    // Source2 selectors (one-hot, 4 columns)
     pub src2_0: F,
     pub src2_1: F,
     pub src2_2: F,
     pub src2_3: F,
-    // 操作選擇器 (one-hot, 2 列)
+    // Operation selectors (one-hot, 2 columns)
     pub op_add: F,
     pub op_sub: F,
 }
 
-/// 實現從切片到 AluRow 的借用轉換
+/// Implement borrow conversion from slice to AluRow
 impl<F> Borrow<AluRow<F>> for [F] {
     fn borrow(&self) -> &AluRow<F> {
         debug_assert_eq!(self.len(), NUM_ALU_COLS);
@@ -79,19 +79,19 @@ impl<F> Borrow<AluRow<F>> for [F] {
     }
 }
 
-/// 為 AluChip 實現 BaseAir trait
+/// Implement BaseAir trait for AluChip
 impl<F> BaseAir<F> for AluChip {
     fn width(&self) -> usize {
         NUM_ALU_COLS
     }
 }
 
-/// 為 AluChip 實現 Air trait，定義約束條件
+/// Implement Air trait for AluChip, defining constraints
 impl<AB: AirBuilder> Air<AB> for AluChip {
     fn eval(&self, builder: &mut AB) {
         let main = builder.main();
 
-        // 獲取當前行和下一行的數據
+        // Get current row and next row data
         let (local, next) = (
             main.row_slice(0).expect("Matrix is empty?"),
             main.row_slice(1).expect("Matrix only has 1 row?"),
@@ -99,9 +99,9 @@ impl<AB: AirBuilder> Air<AB> for AluChip {
         let local: &AluRow<AB::Var> = (*local).borrow();
         let next: &AluRow<AB::Var> = (*next).borrow();
 
-        // 約束 1：選擇器有效性 (Selector Validity)
+        // Constraint 1: Selector Validity
         
-        // 寄存器選擇器必須是 0 或 1
+        // Register selectors must be 0 or 1
         builder.assert_bool(local.dest_0.clone());
         builder.assert_bool(local.dest_1.clone());
         builder.assert_bool(local.dest_2.clone());
@@ -117,11 +117,11 @@ impl<AB: AirBuilder> Air<AB> for AluChip {
         builder.assert_bool(local.src2_2.clone());
         builder.assert_bool(local.src2_3.clone());
 
-        // 操作選擇器必須是 0 或 1
+        // Operation selectors must be 0 or 1
         builder.assert_bool(local.op_add.clone());
         builder.assert_bool(local.op_sub.clone());
 
-        // 確保每一組選擇器都是 one-hot 的
+        // Ensure each group of selectors is one-hot
         builder.assert_one(
             local.dest_0.clone() + local.dest_1.clone() + local.dest_2.clone() + local.dest_3.clone()
         );
@@ -132,13 +132,13 @@ impl<AB: AirBuilder> Air<AB> for AluChip {
             local.src2_0.clone() + local.src2_1.clone() + local.src2_2.clone() + local.src2_3.clone()
         );
         
-        // 操作選擇器也必須是 one-hot 的
+        // Operation selectors must also be one-hot
         builder.assert_one(local.op_add.clone() + local.op_sub.clone());
 
-        // 約束 2：狀態轉移 (State Transition)
+        // Constraint 2: State Transition
         let mut when_transition = builder.when_transition();
         
-        // 計算來源值 (使用點積)
+        // Calculate source values (using dot product)
         let src1_val = local.r0.clone() * local.src1_0.clone()
                      + local.r1.clone() * local.src1_1.clone()
                      + local.r2.clone() * local.src1_2.clone()
@@ -149,20 +149,20 @@ impl<AB: AirBuilder> Air<AB> for AluChip {
                      + local.r2.clone() * local.src2_2.clone()
                      + local.r3.clone() * local.src2_3.clone();
 
-        // 🔥 核心：條件化的運算結果計算
-        // 根據操作選擇器決定執行加法還是減法
+        // 🔥 Core: Conditional operation result calculation
+        // Choose addition or subtraction based on operation selectors
         let add_result = src1_val.clone() + src2_val.clone();
         let sub_result = src1_val - src2_val;
         
-        // 使用選擇器來條件化選擇結果
+        // Use selectors for conditional result selection
         // result = add_result * op_add + sub_result * op_sub
-        // 當 op_add=1, op_sub=0 時：result = add_result
-        // 當 op_add=0, op_sub=1 時：result = sub_result
+        // When op_add=1, op_sub=0: result = add_result
+        // When op_add=0, op_sub=1: result = sub_result
         let result = add_result * local.op_add.clone() + sub_result * local.op_sub.clone();
 
-        // 約束每個寄存器的下一狀態
-        // 如果 dest_i 是 1，則 next_reg[i] = result
-        // 如果 dest_i 是 0，則 next_reg[i] = local_reg[i]
+        // Constrain each register's next state
+        // If dest_i is 1, then next_reg[i] = result
+        // If dest_i is 0, then next_reg[i] = local_reg[i]
         let regs = [&local.r0, &local.r1, &local.r2, &local.r3];
         let next_regs = [&next.r0, &next.r1, &next.r2, &next.r3];
         let dest_selectors = [&local.dest_0, &local.dest_1, &local.dest_2, &local.dest_3];
@@ -175,7 +175,7 @@ impl<AB: AirBuilder> Air<AB> for AluChip {
     }
 }
 
-/// 生成 ALU 的執行軌跡
+/// Generate ALU execution trace
 impl AluChip {
     pub fn generate_trace<F: PrimeField64>(
         program: Vec<Instruction>,
@@ -184,7 +184,7 @@ impl AluChip {
         let n = program.len();
         assert!(n > 0, "Program cannot be empty");
         
-        // 確保長度為 2 的冪次（為了與 Plonky3 兼容）
+        // Ensure length is power of 2 (for Plonky3 compatibility)
         let trace_len = if n.is_power_of_two() { n } else { n.next_power_of_two() };
         
         let mut trace = RowMajorMatrix::new(
@@ -197,12 +197,12 @@ impl AluChip {
         assert!(suffix.is_empty(), "Alignment should match");
         assert_eq!(rows.len(), trace_len);
 
-        // 初始化當前寄存器狀態
+        // Initialize current register state
         let mut current_regs = initial_regs;
 
-        // 處理每條指令
+        // Process each instruction
         for (i, instruction) in program.iter().enumerate() {
-            // 建立當前行 (18 列)
+            // Create current row (18 columns)
             let mut row = AluRow {
                 r0: current_regs[0],
                 r1: current_regs[1],
@@ -224,7 +224,7 @@ impl AluChip {
                 op_sub: F::from_u64(0),
             };
 
-            // 設定目標寄存器選擇器 (one-hot 編碼)
+            // Set destination register selector (one-hot encoding)
             match instruction.dest {
                 0 => row.dest_0 = F::from_u64(1),
                 1 => row.dest_1 = F::from_u64(1),
@@ -233,7 +233,7 @@ impl AluChip {
                 _ => panic!("Invalid dest register: {}", instruction.dest),
             }
 
-            // 設定來源1寄存器選擇器 (one-hot 編碼)
+            // Set source1 register selector (one-hot encoding)
             match instruction.src1 {
                 0 => row.src1_0 = F::from_u64(1),
                 1 => row.src1_1 = F::from_u64(1),
@@ -242,7 +242,7 @@ impl AluChip {
                 _ => panic!("Invalid src1 register: {}", instruction.src1),
             }
 
-            // 設定來源2寄存器選擇器 (one-hot 編碼)
+            // Set source2 register selector (one-hot encoding)
             match instruction.src2 {
                 0 => row.src2_0 = F::from_u64(1),
                 1 => row.src2_1 = F::from_u64(1),
@@ -251,7 +251,7 @@ impl AluChip {
                 _ => panic!("Invalid src2 register: {}", instruction.src2),
             }
 
-            // 設定操作選擇器 (one-hot 編碼)
+            // Set operation selector (one-hot encoding)
             match instruction.op {
                 Opcode::ADD => {
                     row.op_add = F::from_u64(1);
@@ -263,10 +263,10 @@ impl AluChip {
                 }
             }
 
-            // 將行加入 trace
+            // Add row to trace
             rows[i] = row;
 
-            // 更新寄存器狀態（為下一行準備）
+            // Update register state (prepare for next row)
             let src1_val = current_regs[instruction.src1];
             let src2_val = current_regs[instruction.src2];
             
@@ -278,7 +278,7 @@ impl AluChip {
             current_regs[instruction.dest] = result;
         }
 
-        // 如果需要填充額外的行（維持最後狀態）
+        // If padding additional rows is needed (maintain last state)
         for i in n..trace_len {
             rows[i] = rows[n - 1];
         }
@@ -287,7 +287,7 @@ impl AluChip {
     }
 }
 
-// 類型定義（與之前的範例相同）
+// Type definitions (same as previous examples)
 type Val = BabyBear;
 type Perm = Poseidon2BabyBear<16>;
 type MyHash = PaddingFreeSponge<Perm, 16, 8, 8>;
@@ -301,9 +301,9 @@ type Pcs = TwoAdicFriPcs<Val, Dft, ValMmcs, ChallengeMmcs>;
 type MyConfig = StarkConfig<Pcs, Challenge, Challenger>;
 
 fn main() {
-    println!("🔧 開始通用算術邏輯單元 (ALU) 零知識證明器...");
+    println!("🔧 Starting Universal Arithmetic Logic Unit (ALU) zero-knowledge prover...");
 
-    // 設定隨機數生成器和密碼學組件
+    // Set up random number generator and cryptographic components
     let mut rng = SmallRng::seed_from_u64(42);
     let perm = Perm::new_from_rng_128(&mut rng);
     let hash = MyHash::new(perm.clone());
@@ -312,17 +312,17 @@ fn main() {
     let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
     let dft = Dft::default();
 
-    // 創建 FRI 參數
+    // Create FRI parameters
     let fri_params = create_test_fri_params(challenge_mmcs, 2);
     let pcs = Pcs::new(dft, val_mmcs, fri_params);
     let challenger = Challenger::new(perm);
     let config = MyConfig::new(pcs, challenger);
 
-    // 創建 ALU Chip
+    // Create ALU Chip
     let chip = AluChip;
 
-    // 定義測試程式：混合 ADD 和 SUB 指令
-    println!("📝 定義 ALU 測試程式：");
+    // Define test program: mixed ADD and SUB instructions
+    println!("📝 Defining ALU test program:");
     let mut program = vec![
         Instruction { op: Opcode::ADD, dest: 0, src1: 0, src2: 1 }, // r0 = r0 + r1 = 1 + 2 = 3
         Instruction { op: Opcode::SUB, dest: 1, src1: 2, src2: 0 }, // r1 = r2 - r0 = 5 - 3 = 2
@@ -330,7 +330,7 @@ fn main() {
         Instruction { op: Opcode::SUB, dest: 2, src1: 3, src2: 1 }, // r2 = r3 - r1 = 5 - 2 = 3
     ];
 
-    // 添加更多指令以達到 2^6 = 64 條指令
+    // Add more instructions to reach 2^6 = 64 instructions
     while program.len() < 64 {
         program.push(Instruction { op: Opcode::ADD, dest: 0, src1: 0, src2: 1 }); // r0 = r0 + r1
         if program.len() < 64 {
@@ -344,42 +344,42 @@ fn main() {
         }
     }
 
-    // 只顯示前幾條重要指令
+    // Display only first few important instructions
     for (i, inst) in program.iter().take(8).enumerate() {
         let op_str = match inst.op {
             Opcode::ADD => "ADD",
             Opcode::SUB => "SUB",
         };
-        println!("  指令 {}: {} r{} = r{} {} r{}", 
+        println!("  Instruction {}: {} r{} = r{} {} r{}", 
                  i + 1, op_str, inst.dest, inst.src1, 
                  if inst.op == Opcode::ADD { "+" } else { "-" }, 
                  inst.src2);
     }
     if program.len() > 8 {
-        println!("  ... 還有 {} 條指令", program.len() - 8);
+        println!("  ... and {} more instructions", program.len() - 8);
     }
 
-    // 設定初始寄存器狀態
+    // Set initial register state
     let initial_regs = [
         Val::from_u64(1), // r0 = 1
         Val::from_u64(2), // r1 = 2  
         Val::from_u64(5), // r2 = 5
         Val::from_u64(0)  // r3 = 0
     ];
-    println!("🏁 初始寄存器狀態: [r0={}, r1={}, r2={}, r3={}]", 
+    println!("🏁 Initial register state: [r0={}, r1={}, r2={}, r3={}]", 
              initial_regs[0].as_canonical_u64(),
              initial_regs[1].as_canonical_u64(), 
              initial_regs[2].as_canonical_u64(),
              initial_regs[3].as_canonical_u64());
 
-    // 生成執行軌跡
-    println!("📊 生成執行軌跡...");
+    // Generate execution trace
+    println!("📊 Generating execution trace...");
     let trace = AluChip::generate_trace::<Val>(program.clone(), initial_regs);
 
-    // 手動驗證執行結果（只顯示前幾步和最後結果）
-    println!("✨ ALU 執行過程：");
+    // Manual verification of execution results (display only first few steps and final result)
+    println!("✨ ALU execution process:");
     let mut regs = [1u64, 2u64, 5u64, 0u64];
-    println!("  初始狀態: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
+    println!("  Initial state: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
     
     for (i, inst) in program.iter().enumerate() {
         let src1_val = regs[inst.src1];
@@ -391,8 +391,8 @@ fn main() {
                 if src1_val >= src2_val {
                     src1_val - src2_val
                 } else {
-                    // 在有限域中的減法
-                    let p = (1u64 << 31) - (1u64 << 27) + 1; // BabyBear 的模數
+                    // Subtraction in finite field
+                    let p = (1u64 << 31) - (1u64 << 27) + 1; // BabyBear modulus
                     (src1_val + p - src2_val) % p
                 }
             }
@@ -400,13 +400,13 @@ fn main() {
         
         regs[inst.dest] = result;
         
-        // 只顯示前 6 步的詳細執行過程
+        // Display detailed execution process for only first 6 steps
         if i < 6 {
             let op_str = match inst.op {
                 Opcode::ADD => "+",
                 Opcode::SUB => "-",
             };
-            println!("  執行指令 {}: r{} = r{} {} r{} = {} {} {} = {} -> [r0={}, r1={}, r2={}, r3={}]", 
+            println!("  Execute instruction {}: r{} = r{} {} r{} = {} {} {} = {} -> [r0={}, r1={}, r2={}, r3={}]", 
                      i + 1, inst.dest, inst.src1, op_str, inst.src2, 
                      src1_val, op_str, src2_val, result,
                      regs[0], regs[1], regs[2], regs[3]);
@@ -414,28 +414,28 @@ fn main() {
     }
     
     if program.len() > 6 {
-        println!("  ... 執行了 {} 條指令", program.len() - 6);
+        println!("  ... executed {} more instructions", program.len() - 6);
     }
 
-    println!("🎯 最終寄存器狀態: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
+    println!("🎯 Final register state: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
 
-    // 生成證明
-    println!("🔐 正在生成 STARK 證明...");
+    // Generate proof
+    println!("🔐 Generating STARK proof...");
     let proof = prove(&config, &chip, trace, &vec![]);
-    println!("✅ 證明生成完成！");
+    println!("✅ Proof generation completed!");
 
-    // 驗證證明
-    println!("🔍 正在驗證證明...");
+    // Verify proof
+    println!("🔍 Verifying proof...");
     match verify(&config, &chip, &proof, &vec![]) {
-        Ok(_) => println!("🎉 證明驗證成功！ALU 執行正確性已得到證明。"),
-        Err(e) => println!("❌ 證明驗證失敗：{:?}", e),
+        Ok(_) => println!("🎉 Proof verification successful! ALU execution correctness has been proven."),
+        Err(e) => println!("❌ Proof verification failed: {:?}", e),
     }
 
-    println!("🏁 通用算術邏輯單元 (ALU) 零知識證明器運行完畢！");
+    println!("🏁 Universal Arithmetic Logic Unit (ALU) zero-knowledge prover completed!");
     
-    // 🤔 思考題提示
-    println!("\n💭 思考題：");
-    println!("1. 條件約束的威力：操作選擇器如何實現 if/else 邏輯？");
-    println!("2. 如果用單一 is_sub 欄位替代 op_add/op_sub，約束該如何修改？");
-    println!("3. 如何進一步添加 MUL 指令？需要修改哪些部分？");
+    // 🤔 Reflection Questions
+    println!("\n💭 Reflection Questions:");
+    println!("1. Power of conditional constraints: How do operation selectors implement if/else logic?");
+    println!("2. If using single is_sub field instead of op_add/op_sub, how should constraints be modified?");
+    println!("3. How to further add MUL instruction? Which parts need modification?");
 } 

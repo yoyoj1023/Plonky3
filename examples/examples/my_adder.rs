@@ -15,48 +15,48 @@ use p3_uni_stark::{StarkConfig, prove, verify};
 use rand::SeedableRng;
 use rand::rngs::SmallRng;
 
-/// 表示一條加法指令
+/// Represents an addition instruction
 #[derive(Clone, Copy, Debug)]
 struct Instruction {
-    dest: usize, // 目標寄存器索引 0-3
-    src1: usize, // 來源1寄存器索引 0-3
-    src2: usize, // 來源2寄存器索引 0-3
+    dest: usize, // Destination register index 0-3
+    src1: usize, // Source1 register index 0-3
+    src2: usize, // Source2 register index 0-3
 }
 
-/// 通用加法處理器 Chip 結構
+/// Universal adder processor Chip structure
 pub struct AdderChip;
 
-/// 通用加法處理器的列數（16 列）
-/// 4 個寄存器值 + 4*3 個選擇器
+/// Number of columns in universal adder processor (16 columns)
+/// 4 register values + 4*3 selectors
 const NUM_ADDER_COLS: usize = 16;
 
-/// 表示通用加法處理器的一行數據
-/// 包含 4 個寄存器值和 12 個選擇器
+/// Represents one row of data in the universal adder processor
+/// Contains 4 register values and 12 selectors
 #[derive(Clone, Copy)]
 pub struct AdderRow<F> {
-    // 寄存器值
+    // Register values
     pub r0: F,
     pub r1: F,
     pub r2: F,
     pub r3: F,
-    // 目標選擇器 (one-hot)
+    // Destination selectors (one-hot)
     pub dest_0: F,
     pub dest_1: F,
     pub dest_2: F,
     pub dest_3: F,
-    // 來源1選擇器 (one-hot)
+    // Source1 selectors (one-hot)
     pub src1_0: F,
     pub src1_1: F,
     pub src1_2: F,
     pub src1_3: F,
-    // 來源2選擇器 (one-hot)
+    // Source2 selectors (one-hot)
     pub src2_0: F,
     pub src2_1: F,
     pub src2_2: F,
     pub src2_3: F,
 }
 
-/// 實現從切片到 AdderRow 的借用轉換
+/// Implement borrow conversion from slice to AdderRow
 impl<F> Borrow<AdderRow<F>> for [F] {
     fn borrow(&self) -> &AdderRow<F> {
         debug_assert_eq!(self.len(), NUM_ADDER_COLS);
@@ -68,19 +68,19 @@ impl<F> Borrow<AdderRow<F>> for [F] {
     }
 }
 
-/// 為 AdderChip 實現 BaseAir trait
+/// Implement BaseAir trait for AdderChip
 impl<F> BaseAir<F> for AdderChip {
     fn width(&self) -> usize {
         NUM_ADDER_COLS
     }
 }
 
-/// 為 AdderChip 實現 Air trait，定義約束條件
+/// Implement Air trait for AdderChip, defining constraints
 impl<AB: AirBuilder> Air<AB> for AdderChip {
     fn eval(&self, builder: &mut AB) {
         let main = builder.main();
 
-        // 獲取當前行和下一行的數據
+        // Get current row and next row data
         let (local, next) = (
             main.row_slice(0).expect("Matrix is empty?"),
             main.row_slice(1).expect("Matrix only has 1 row?"),
@@ -88,8 +88,8 @@ impl<AB: AirBuilder> Air<AB> for AdderChip {
         let local: &AdderRow<AB::Var> = (*local).borrow();
         let next: &AdderRow<AB::Var> = (*next).borrow();
 
-        // 約束 1：選擇器有效性 (Selector Validity)
-        // 確保所有選擇器欄位的值都是 0 或 1
+        // Constraint 1: Selector Validity
+        // Ensure all selector field values are 0 or 1
         builder.assert_bool(local.dest_0.clone());
         builder.assert_bool(local.dest_1.clone());
         builder.assert_bool(local.dest_2.clone());
@@ -105,7 +105,7 @@ impl<AB: AirBuilder> Air<AB> for AdderChip {
         builder.assert_bool(local.src2_2.clone());
         builder.assert_bool(local.src2_3.clone());
 
-        // 確保每一組選擇器都是 one-hot 的
+        // Ensure each group of selectors is one-hot
         builder.assert_one(
             local.dest_0.clone() + local.dest_1.clone() + local.dest_2.clone() + local.dest_3.clone()
         );
@@ -116,10 +116,10 @@ impl<AB: AirBuilder> Air<AB> for AdderChip {
             local.src2_0.clone() + local.src2_1.clone() + local.src2_2.clone() + local.src2_3.clone()
         );
 
-        // 約束 2：狀態轉移 (State Transition)
+        // Constraint 2: State Transition
         let mut when_transition = builder.when_transition();
         
-        // 計算來源值 (使用點積)
+        // Calculate source values (using dot product)
         let src1_val = local.r0.clone() * local.src1_0.clone()
                      + local.r1.clone() * local.src1_1.clone()
                      + local.r2.clone() * local.src1_2.clone()
@@ -130,12 +130,12 @@ impl<AB: AirBuilder> Air<AB> for AdderChip {
                      + local.r2.clone() * local.src2_2.clone()
                      + local.r3.clone() * local.src2_3.clone();
 
-        // 計算加法結果
+        // Calculate addition result
         let add_result = src1_val + src2_val;
 
-        // 約束每個寄存器的下一狀態
-        // 如果 dest_i 是 1，則 next_reg[i] = add_result
-        // 如果 dest_i 是 0，則 next_reg[i] = local_reg[i]
+        // Constrain each register's next state
+        // If dest_i is 1, then next_reg[i] = add_result
+        // If dest_i is 0, then next_reg[i] = local_reg[i]
         let regs = [&local.r0, &local.r1, &local.r2, &local.r3];
         let next_regs = [&next.r0, &next.r1, &next.r2, &next.r3];
         let dest_selectors = [&local.dest_0, &local.dest_1, &local.dest_2, &local.dest_3];
@@ -148,7 +148,7 @@ impl<AB: AirBuilder> Air<AB> for AdderChip {
     }
 }
 
-/// 生成通用加法處理器的執行軌跡
+/// Generate execution trace for universal adder processor
 impl AdderChip {
     pub fn generate_trace<F: PrimeField64>(
         program: Vec<Instruction>,
@@ -157,7 +157,7 @@ impl AdderChip {
         let n = program.len();
         assert!(n > 0, "Program cannot be empty");
         
-        // 確保長度為 2 的冪次（為了與 Plonky3 兼容）
+        // Ensure length is power of 2 (for Plonky3 compatibility)
         let trace_len = if n.is_power_of_two() { n } else { n.next_power_of_two() };
         
         let mut trace = RowMajorMatrix::new(
@@ -170,12 +170,12 @@ impl AdderChip {
         assert!(suffix.is_empty(), "Alignment should match");
         assert_eq!(rows.len(), trace_len);
 
-        // 初始化當前寄存器狀態
+        // Initialize current register state
         let mut current_regs = initial_regs;
 
-        // 處理每條指令
+        // Process each instruction
         for (i, instruction) in program.iter().enumerate() {
-            // 建立當前行
+            // Create current row
             let mut row = AdderRow {
                 r0: current_regs[0],
                 r1: current_regs[1],
@@ -195,7 +195,7 @@ impl AdderChip {
                 src2_3: F::from_u64(0),
             };
 
-            // 設定選擇器 (one-hot 編碼)
+            // Set selectors (one-hot encoding)
             match instruction.dest {
                 0 => row.dest_0 = F::from_u64(1),
                 1 => row.dest_1 = F::from_u64(1),
@@ -220,17 +220,17 @@ impl AdderChip {
                 _ => panic!("Invalid src2 register: {}", instruction.src2),
             }
 
-            // 將行加入 trace
+            // Add row to trace
             rows[i] = row;
 
-            // 更新寄存器狀態（為下一行準備）
+            // Update register state (prepare for next row)
             let src1_val = current_regs[instruction.src1];
             let src2_val = current_regs[instruction.src2];
             let add_result = src1_val + src2_val;
             current_regs[instruction.dest] = add_result;
         }
 
-        // 如果需要填充額外的行（維持最後狀態）
+        // If padding additional rows is needed (maintain last state)
         for i in n..trace_len {
             rows[i] = rows[n - 1];
         }
@@ -239,7 +239,7 @@ impl AdderChip {
     }
 }
 
-// 類型定義（與 Fibonacci 範例相同）
+// Type definitions (same as Fibonacci example)
 type Val = BabyBear;
 type Perm = Poseidon2BabyBear<16>;
 type MyHash = PaddingFreeSponge<Perm, 16, 8, 8>;
@@ -253,9 +253,9 @@ type Pcs = TwoAdicFriPcs<Val, Dft, ValMmcs, ChallengeMmcs>;
 type MyConfig = StarkConfig<Pcs, Challenge, Challenger>;
 
 fn main() {
-    println!("🔧 開始通用加法處理器零知識證明器...");
+    println!("🔧 Starting universal adder processor zero-knowledge prover...");
 
-    // 設定隨機數生成器和密碼學組件
+    // Set up random number generator and cryptographic components
     let mut rng = SmallRng::seed_from_u64(42);
     let perm = Perm::new_from_rng_128(&mut rng);
     let hash = MyHash::new(perm.clone());
@@ -264,24 +264,24 @@ fn main() {
     let challenge_mmcs = ChallengeMmcs::new(val_mmcs.clone());
     let dft = Dft::default();
 
-    // 創建 FRI 參數
+    // Create FRI parameters
     let fri_params = create_test_fri_params(challenge_mmcs, 2);
     let pcs = Pcs::new(dft, val_mmcs, fri_params);
     let challenger = Challenger::new(perm);
     let config = MyConfig::new(pcs, challenger);
 
-    // 創建通用加法處理器 Chip
+    // Create universal adder processor Chip
     let chip = AdderChip;
 
-    // 定義測試程式（增加更多指令以滿足 STARK 最小大小要求）
-    println!("📝 定義測試程式：");
+    // Define test program (add more instructions to meet STARK minimum size requirement)
+    println!("📝 Defining test program:");
     let mut program = vec![
         Instruction { dest: 2, src1: 0, src2: 1 }, // r2 = r0 + r1   (1 + 2 = 3)
         Instruction { dest: 3, src1: 2, src2: 2 }, // r3 = r2 + r2   (3 + 3 = 6)
         Instruction { dest: 0, src1: 3, src2: 1 }, // r0 = r3 + r1   (6 + 2 = 8)
     ];
     
-    // 添加更多指令以達到 2^6 = 64 條指令
+    // Add more instructions to reach 2^6 = 64 instructions
     while program.len() < 64 {
         program.push(Instruction { dest: 1, src1: 1, src2: 1 }); // r1 = r1 + r1 (doubling)
         if program.len() < 64 {
@@ -295,30 +295,30 @@ fn main() {
         }
     }
 
-    // 只顯示前幾條重要指令
+    // Display only first few important instructions
     for (i, inst) in program.iter().take(10).enumerate() {
-        println!("  指令 {}: r{} = r{} + r{}", i + 1, inst.dest, inst.src1, inst.src2);
+        println!("  Instruction {}: r{} = r{} + r{}", i + 1, inst.dest, inst.src1, inst.src2);
     }
     if program.len() > 10 {
-        println!("  ... 還有 {} 條指令", program.len() - 10);
+        println!("  ... and {} more instructions", program.len() - 10);
     }
 
-    // 設定初始寄存器狀態
+    // Set initial register state
     let initial_regs = [Val::from_u64(1), Val::from_u64(2), Val::from_u64(0), Val::from_u64(0)];
-    println!("🏁 初始寄存器狀態: [r0={}, r1={}, r2={}, r3={}]", 
+    println!("🏁 Initial register state: [r0={}, r1={}, r2={}, r3={}]", 
              initial_regs[0].as_canonical_u64(),
              initial_regs[1].as_canonical_u64(), 
              initial_regs[2].as_canonical_u64(),
              initial_regs[3].as_canonical_u64());
 
-    // 生成執行軌跡
-    println!("📊 生成執行軌跡...");
+    // Generate execution trace
+    println!("📊 Generating execution trace...");
     let trace = AdderChip::generate_trace::<Val>(program.clone(), initial_regs);
 
-    // 手動驗證執行結果（只顯示前幾步和最後結果）
-    println!("✨ 程式執行過程：");
+    // Manual verification of execution results (display only first few steps and final result)
+    println!("✨ Program execution process:");
     let mut regs = [1u64, 2u64, 0u64, 0u64];
-    println!("  初始狀態: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
+    println!("  Initial state: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
     
     for (i, inst) in program.iter().enumerate() {
         let src1_val = regs[inst.src1];
@@ -326,31 +326,31 @@ fn main() {
         let result = src1_val + src2_val;
         regs[inst.dest] = result;
         
-        // 只顯示前 5 步的詳細執行過程
+        // Display detailed execution process for only first 5 steps
         if i < 5 {
-            println!("  執行指令 {}: r{} = r{} + r{} = {} + {} = {} -> [r0={}, r1={}, r2={}, r3={}]", 
+            println!("  Execute instruction {}: r{} = r{} + r{} = {} + {} = {} -> [r0={}, r1={}, r2={}, r3={}]", 
                      i + 1, inst.dest, inst.src1, inst.src2, src1_val, src2_val, result,
                      regs[0], regs[1], regs[2], regs[3]);
         }
     }
     
     if program.len() > 5 {
-        println!("  ... 執行了 {} 條指令", program.len() - 5);
+        println!("  ... executed {} more instructions", program.len() - 5);
     }
 
-    println!("🎯 最終寄存器狀態: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
+    println!("🎯 Final register state: [r0={}, r1={}, r2={}, r3={}]", regs[0], regs[1], regs[2], regs[3]);
 
-    // 生成證明
-    println!("🔐 正在生成 STARK 證明...");
+    // Generate proof
+    println!("🔐 Generating STARK proof...");
     let proof = prove(&config, &chip, trace, &vec![]);
-    println!("✅ 證明生成完成！");
+    println!("✅ Proof generation completed!");
 
-    // 驗證證明
-    println!("🔍 正在驗證證明...");
+    // Verify proof
+    println!("🔍 Verifying proof...");
     match verify(&config, &chip, &proof, &vec![]) {
-        Ok(_) => println!("🎉 證明驗證成功！通用加法處理器執行正確性已得到證明。"),
-        Err(e) => println!("❌ 證明驗證失敗：{:?}", e),
+        Ok(_) => println!("🎉 Proof verification successful! Universal adder processor execution correctness has been proven."),
+        Err(e) => println!("❌ Proof verification failed: {:?}", e),
     }
 
-    println!("🏁 通用加法處理器零知識證明器運行完畢！");
+    println!("🏁 Universal adder processor zero-knowledge prover completed!");
 } 
