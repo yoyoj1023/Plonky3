@@ -1,22 +1,22 @@
-### 習題：
+### Exercise:
 
-假設我們在有限體 F₁₇（即所有運算都在模 17 意義下進行）中工作。
+Suppose we work in the finite field F₁₇ (i.e., all operations are performed modulo 17).
 
-我們有一個多項式 f(x) = x³ + 2x² + 3x + 4。
+We have a polynomial f(x) = x³ + 2x² + 3x + 4.
 
-我們的取值定義域 (Domain) 是一個對稱的點集合 S₀ = {-4, -3, -2, -1, 1, 2, 3, 4}。
+Our evaluation domain is a symmetric point set S₀ = {-4, -3, -2, -1, 1, 2, 3, 4}.
 
-**任務：**
+**Tasks:**
 
-1.  計算多項式 f(x) 在定義域 S₀ 上的所有取值。
-2.  對這些取值進行一次 FRI 摺疊，產生一個新的多項式 f₁(x) 和一個新的定義域 S₁。
-3.  實際計算並驗證摺疊的結果。
+1.  Calculate all values of polynomial f(x) on domain S₀.
+2.  Perform one FRI folding on these values to generate a new polynomial f₁(x) and a new domain S₁.
+3.  Actually compute and verify the folding results.
 
 ---
 
-### 步驟一：計算原始多項式在定義域上的取值
+### Step 1: Calculate Values of Original Polynomial on Domain
 
-首先，我們計算 f(x) = x³ + 2x² + 3x + 4 在 S₀ = {-4, -3, -2, -1, 1, 2, 3, 4} 上的取值。所有計算都在 F₁₇ 中進行。
+First, we calculate f(x) = x³ + 2x² + 3x + 4 on S₀ = {-4, -3, -2, -1, 1, 2, 3, 4}. All calculations are performed in F₁₇.
 
 *   f(1) = 1³ + 2(1)² + 3(1) + 4 = 1 + 2 + 3 + 4 = 10 (mod 17)
 *   f(-1) = (-1)³ + 2(-1)² + 3(-1) + 4 = -1 + 2 - 3 + 4 = 2 (mod 17)
@@ -27,276 +27,276 @@
 *   f(4) = 4³ + 2(4)² + 3(4) + 4 = 64 + 32 + 12 + 4 = 112 ≡ 10 (mod 17)
 *   f(-4) = (-4)³ + 2(-4)² + 3(-4) + 4 = -64 + 32 - 12 + 4 = -40 ≡ 11 (mod 17)
 
-所以，我們得到的承諾 (Commitment) 就是這些值的列表：
+So, the commitment we get is this list of values:
 
 C₀ = {f(1), f(-1), f(2), f(-2), f(3), f(-3), f(4), f(-4)}
 
 C₀ = {10, 2, 9, 15, 7, 3, 10, 11}
 
-### 步驟二：進行 FRI 摺疊
+### Step 2: Perform FRI Folding
 
-FRI 的核心思想是利用對稱性來摺疊多項式。我們將多項式 f(x) 分解為偶部 g(x²) 和奇部 x · h(x²)。
+The core idea of FRI is to use symmetry to fold polynomials. We decompose polynomial f(x) into even part g(x²) and odd part x · h(x²).
 
 f(x) = (2x² + 4) + x(x² + 3)
 
-這裡：
-*   偶部對應的函數是 g(y) = 2y + 4
-*   奇部對應的函數是 h(y) = y + 3
+Here:
+*   The even part corresponds to function g(y) = 2y + 4
+*   The odd part corresponds to function h(y) = y + 3
 
-Prover 會選擇一個隨機的挑戰值 α（由 Verifier 提供）。我們假設 Verifier 選擇了 α = 5。
+The Prover will choose a random challenge value α (provided by the Verifier). We assume the Verifier chose α = 5.
 
-現在，Prover 要構造一個新的多項式 f₁(x)：
+Now, the Prover constructs a new polynomial f₁(x):
 f₁(y) = g(y) + α · h(y) = (2y + 4) + 5(y + 3) = 2y + 4 + 5y + 15 = 7y + 19 ≡ 7y + 2 (mod 17)
 
-所以，新的、階數更低的多項式是 f₁(y) = 7y + 2。
+So, the new, lower-degree polynomial is f₁(y) = 7y + 2.
 
-同時，我們也需要一個新的定義域 S₁。這個新的定義域是將 S₀ 中的對稱點配對後，取其平方所組成：
+At the same time, we also need a new domain S₁. This new domain is formed by pairing symmetric points in S₀ and taking their squares:
 S₁ = {1², 2², 3², 4²} = {1, 4, 9, 16}
-由於 16 ≡ -1 (mod 17)，我們也可以寫成 S₁ = {1, 4, 9, -1}。
+Since 16 ≡ -1 (mod 17), we can also write S₁ = {1, 4, 9, -1}.
 
-#### 第二次摺疊：從一次多項式到常數多項式
+#### Second Folding: From Linear to Constant Polynomial
 
-現在我們需要對一次多項式 f₁(y) = 7y + 2 進行第二次摺疊。
+Now we need to perform a second folding on the linear polynomial f₁(y) = 7y + 2.
 
-首先，計算 f₁(y) = 7y + 2 在定義域 S₁ = {1, 4, 9, 16} 上的取值：
+First, calculate f₁(y) = 7y + 2 on domain S₁ = {1, 4, 9, 16}:
 
 *   f₁(1) = 7(1) + 2 = 9
 *   f₁(4) = 7(4) + 2 = 28 + 2 = 30 ≡ 13 (mod 17)
-*   f₁(9) = 7(9) + 2 = 63 + 2 = 65 ≡ 14 (mod 17)（因為 65 = 3 × 17 + 14）
+*   f₁(9) = 7(9) + 2 = 63 + 2 = 65 ≡ 14 (mod 17) (since 65 = 3 × 17 + 14)
 *   f₁(16) = f₁(-1) = 7(-1) + 2 = -7 + 2 = -5 ≡ 12 (mod 17)
 
-所以第二輪的承諾是：
+So the second round commitment is:
 C₁ = {f₁(1), f₁(4), f₁(9), f₁(-1)} = {9, 13, 14, 12}
 
-對於一次多項式 f₁(y) = 7y + 2，我們可以將其分解為：
-*   偶部（常數項）：g₁(z) = 2
-*   奇部係數：h₁(z) = 7
+For the linear polynomial f₁(y) = 7y + 2, we can decompose it as:
+*   Even part (constant term): g₁(z) = 2
+*   Odd part coefficient: h₁(z) = 7
 
-Verifier 提供第二個挑戰值，假設 α₂ = 3。
+The Verifier provides a second challenge value, assume α₂ = 3.
 
-第二次摺疊的結果是一個常數多項式：
+The result of the second folding is a constant polynomial:
 f₂(z) = g₁(z) + α₂ · h₁(z) = 2 + 3 × 7 = 2 + 21 = 23 ≡ 6 (mod 17)
 
-所以，經過兩次摺疊後，我們得到了常數多項式 f₂(z) = 6。
+So, after two foldings, we get constant polynomial f₂(z) = 6.
 
-新的定義域 S₂ 對應於 S₁ 中對稱點的配對。在這個例子中，我們可以將點配對為：
-*   配對1：(1, -1) → 代表元為 1² = 1
-*   配對2：(4, 9) → 由於 2² = 4 和 3² = 9，我們可以選擇代表元 4
+The new domain S₂ corresponds to pairing symmetric points in S₁. In this example, we can pair the points as:
+*   Pair 1: (1, -1) → representative element is 1² = 1
+*   Pair 2: (4, 9) → since 2² = 4 and 3² = 9, we can choose representative element 4
 
-所以 S₂ = {1, 4}。
+So S₂ = {1, 4}.
 
-最終的常數多項式 f₂(z) = 6 在任何點上的值都是 6：
+The final constant polynomial f₂(z) = 6 has value 6 at any point:
 *   f₂(1) = 6
 *   f₂(4) = 6
 
-第三輪的承諾是：
+The third round commitment is:
 C₂ = {6, 6}
 
-#### 最終摺疊：達到常數
+#### Final Folding: Reaching Constant
 
-由於我們已經得到了常數多項式，FRI 過程可以結束。Verifier 可以直接驗證這個常數值是否正確，而不需要進一步的查詢。
+Since we have reached a constant polynomial, the FRI process can end. The Verifier can directly verify this constant value without further queries.
 
-### 步驟三：實際查詢與驗證
+### Step 3: Actual Query and Verification
 
-現在，Verifier 需要驗證 Prover 的計算是否正確。Verifier 不會去計算整個 C₁，而是會隨機抽查一個點。
+Now, the Verifier needs to verify whether the Prover's computation is correct. The Verifier will not compute the entire C₁, but will randomly sample a point.
 
-假設 Verifier 隨機選擇了 x₀ = 2 這一點來進行查詢。
+Assume the Verifier randomly chose point x₀ = 2 for query.
 
-1.  **Verifier 的要求：**
-    Verifier 會向 Prover 索取三個值：f(2), f(-2) 和 f₁(2²)，也就是 f₁(4)。
+1.  **Verifier's Request:**
+    The Verifier will ask the Prover for three values: f(2), f(-2) and f₁(2²), which is f₁(4).
 
-2.  **Prover 的回覆：**
+2.  **Prover's Response:**
     *   f(2) = 9
     *   f(-2) = 15
     *   f₁(4) = 7(4) + 2 = 28 + 2 = 30 ≡ 13 (mod 17)
 
-3.  **Verifier 的驗證計算：**
-    Verifier 現在要驗證這三個值是否滿足摺疊關係。FRI 摺疊的核心關係式是：
+3.  **Verifier's Verification Calculation:**
+    The Verifier now needs to verify whether these three values satisfy the folding relation. The core relation of FRI folding is:
     
     ```
     f₁(x₀²) = [f(x₀) + f(-x₀)]/2 + α · [f(x₀) - f(-x₀)]/(2x₀)
     ```
 
-    我們將 Prover 提供的數值代入公式的右側：
+    We substitute the values provided by the Prover into the right side of the formula:
     
-    *   **第一部分（偶部貢獻）：**
+    *   **First part (even part contribution):**
         [f(2) + f(-2)]/2 = (9 + 15)/2 = 24/2 = 12
-        這裡需要計算 2⁻¹ (mod 17)。因為 9 × 2 = 18 ≡ 1 (mod 17)，所以 2⁻¹ ≡ 9 (mod 17)。
-        所以，24/2 = 24 × 9 = 216 ≡ (12 × 17 + 12) ≡ 12 (mod 17)。
+        Here we need to compute 2⁻¹ (mod 17). Since 9 × 2 = 18 ≡ 1 (mod 17), so 2⁻¹ ≡ 9 (mod 17).
+        So, 24/2 = 24 × 9 = 216 ≡ (12 × 17 + 12) ≡ 12 (mod 17).
 
-    *   **第二部分（奇部貢獻）：**
+    *   **Second part (odd part contribution):**
         α · [f(2) - f(-2)]/(2x₀) = 5 · (9 - 15)/(2(2)) = 5 · (-6)/4 = 5 · 11/4
-        我們需要計算 4⁻¹ (mod 17)。因為 13 × 4 = 52 ≡ 1 (mod 17)，所以 4⁻¹ ≡ 13 (mod 17)。
-        所以，11/4 = 11 × 13 = 143 ≡ (8 × 17 + 7) ≡ 7 (mod 17)。
-        整個第二部分等於 5 · 7 = 35 ≡ 1 (mod 17)。
+        We need to compute 4⁻¹ (mod 17). Since 13 × 4 = 52 ≡ 1 (mod 17), so 4⁻¹ ≡ 13 (mod 17).
+        So, 11/4 = 11 × 13 = 143 ≡ (8 × 17 + 7) ≡ 7 (mod 17).
+        The entire second part equals 5 · 7 = 35 ≡ 1 (mod 17).
 
-    *   **合併結果：**
+    *   **Combined result:**
         12 + 1 = 13 (mod 17)
 
-4.  **比對：**
-    Verifier 計算出的結果是 **13**。
-    Prover 提供的 f₁(4) 的值也是 **13**。
+4.  **Comparison:**
+    The Verifier's calculated result is **13**.
+    The Prover's provided f₁(4) value is also **13**.
 
-    兩者完全一致！這表示，至少在 x₀=2 這個點上，Prover 的第一次摺疊計算是誠實的。
+    They match perfectly! This shows that, at least at point x₀=2, the Prover's first folding calculation is honest.
 
-### 驗證第二次摺疊：從一次多項式到常數多項式
+### Verifying Second Folding: From Linear to Constant Polynomial
 
-現在我們需要驗證第二次摺疊的正確性，即從 f₁(y) = 7y + 2 摺疊到常數多項式 f₂(z) = 6 的過程。
+Now we need to verify the correctness of the second folding, i.e., the process from f₁(y) = 7y + 2 folding to constant polynomial f₂(z) = 6.
 
-假設 Verifier 隨機選擇了 y₀ = 4 這一點來進行第二次查詢。
+Assume the Verifier randomly chose y₀ = 4 for the second query.
 
-1.  **Verifier 的要求：**
-    Verifier 會向 Prover 索取以下值：
+1.  **Verifier's Request:**
+    The Verifier will ask the Prover for the following values:
     - f₁(4) = 13
-    - f₁(-4) = f₁(13)（因為 -4 ≡ 13 (mod 17)）
-    - f₂(4²) = f₂(16) = f₂(-1) = 6（常數多項式在任何點的值都是 6）
+    - f₁(-4) = f₁(13) (since -4 ≡ 13 (mod 17))
+    - f₂(4²) = f₂(16) = f₂(-1) = 6 (constant polynomial has value 6 at any point)
 
-2.  **計算 f₁(-4) = f₁(13)：**
-    f₁(13) = 7(13) + 2 = 91 + 2 = 93 ≡ 8 (mod 17)（因為 93 = 5 × 17 + 8）
+2.  **Calculate f₁(-4) = f₁(13):**
+    f₁(13) = 7(13) + 2 = 91 + 2 = 93 ≡ 8 (mod 17) (since 93 = 5 × 17 + 8)
 
-3.  **Prover 的回覆：**
+3.  **Prover's Response:**
     *   f₁(4) = 13
     *   f₁(-4) = f₁(13) = 8
     *   f₂(16) = 6
 
-4.  **Verifier 的驗證計算：**
-    對於第二次摺疊，我們有 f₁(y) = 7y + 2，分解為：
-    - 偶部（常數項）：g₁(z) = 2
-    - 奇部係數：h₁(z) = 7
+4.  **Verifier's Verification Calculation:**
+    For the second folding, we have f₁(y) = 7y + 2, decomposed as:
+    - Even part (constant term): g₁(z) = 2
+    - Odd part coefficient: h₁(z) = 7
     
-    驗證關係式為：
+    The verification relation is:
     ```
     f₂(y₀²) = g₁(y₀²) + α₂ · h₁(y₀²)
     ```
     
-    但對於一次多項式，我們可以用更直接的公式：
+    But for linear polynomials, we can use a more direct formula:
     ```
     f₂(y₀²) = [f₁(y₀) + f₁(-y₀)]/2 + α₂ · [f₁(y₀) - f₁(-y₀)]/(2y₀)
     ```
 
-    將數值代入：
-    *   **第一部分（偶部貢獻）：**
+    Substituting values:
+    *   **First part (even part contribution):**
         [f₁(4) + f₁(-4)]/2 = (13 + 8)/2 = 21/2
-        計算 21/2 = 21 × 9 = 189 ≡ (11 × 17 + 2) ≡ 2 (mod 17)
+        Calculate 21/2 = 21 × 9 = 189 ≡ (11 × 17 + 2) ≡ 2 (mod 17)
 
-    *   **第二部分（奇部貢獻）：**
+    *   **Second part (odd part contribution):**
         α₂ · [f₁(4) - f₁(-4)]/(2y₀) = 3 · (13 - 8)/(2(4)) = 3 · 5/8
-        我們需要計算 8⁻¹ (mod 17)。因為 15 × 8 = 120 ≡ 1 (mod 17)，所以 8⁻¹ ≡ 15 (mod 17)。
-        所以，5/8 = 5 × 15 = 75 ≡ (4 × 17 + 7) ≡ 7 (mod 17)。
-        整個第二部分等於 3 × 7 = 21 ≡ 4 (mod 17)。
+        We need to compute 8⁻¹ (mod 17). Since 15 × 8 = 120 ≡ 1 (mod 17), so 8⁻¹ ≡ 15 (mod 17).
+        So, 5/8 = 5 × 15 = 75 ≡ (4 × 17 + 7) ≡ 7 (mod 17).
+        The entire second part equals 3 × 7 = 21 ≡ 4 (mod 17).
 
-    *   **合併結果：**
+    *   **Combined result:**
         2 + 4 = 6 (mod 17)
 
-5.  **比對：**
-    Verifier 計算出的結果是 **6**。
-    Prover 提供的 f₂(16) 的值也是 **6**。
+5.  **Comparison:**
+    The Verifier's calculated result is **6**.
+    The Prover's provided f₂(16) value is also **6**.
 
-    兩者完全一致！這表示第二次摺疊也是誠實的。
+    They match perfectly! This shows the second folding is also honest.
 
-### 最終驗證
+### Final Verification
 
-由於我們已經達到了常數多項式 f₂(z) = 6，Verifier 可以直接檢查這個常數值。常數多項式在所有點上的值都應該相同，這很容易驗證。
+Since we have reached constant polynomial f₂(z) = 6, the Verifier can directly check this constant value. A constant polynomial should have the same value at all points, which is very easy to verify.
 
-**完整的 FRI 驗證總結：**
-1. ✅ 第一次摺疊驗證通過：f(x) → f₁(y)
-2. ✅ 第二次摺疊驗證通過：f₁(y) → f₂(z) = 6
-3. ✅ 最終常數多項式驗證：f₂(z) = 6 是一個有效的常數
+**Complete FRI Verification Summary:**
+1. ✅ First folding verification passed: f(x) → f₁(y)
+2. ✅ Second folding verification passed: f₁(y) → f₂(z) = 6
+3. ✅ Final constant polynomial verification: f₂(z) = 6 is a valid constant
 
-通過這個完整的 FRI 過程，Verifier 可以高度確信 Prover 提供的原始承諾 C₀ 確實代表了一個低階多項式（階數小於 8）的取值，而不需要檢查所有的點。
+Through this complete FRI process, the Verifier can be highly confident that the Prover's provided original commitment C₀ indeed represents the evaluations of a low-degree polynomial (degree less than 8) without checking all points.
 
 ---
 
-## 補充：FRI 摺疊核心關係式的完整推導
+## Supplement: Complete Derivation of FRI Folding Core Relation
 
-### 第一步：多項式的偶奇分解
+### Step 1: Even-Odd Decomposition of Polynomials
 
-任何多項式 P(x) 都可以唯一地分解為偶部和奇部：
+Any polynomial P(x) can be uniquely decomposed into even and odd parts:
 
 P(x) = P_even(x) + P_odd(x)
 
-其中：
-- **偶部** P_even(x)：只包含偶次項，可以寫成 G(x²) 的形式
-- **奇部** P_odd(x)：只包含奇次項，可以寫成 x · H(x²) 的形式
+Where:
+- **Even part** P_even(x): contains only even-degree terms, can be written as G(x²)
+- **Odd part** P_odd(x): contains only odd-degree terms, can be written as x · H(x²)
 
-因此：
+Therefore:
 P(x) = G(x²) + x · H(x²)
 
-**為什麼要這樣分解？**
-- 偶次項在 x 和 -x 處有相同的值
-- 奇次項在 x 和 -x 處有相反的值
-- 這種對稱性是 FRI 摺疊的核心
+**Why this decomposition?**
+- Even-degree terms have the same values at x and -x
+- Odd-degree terms have opposite values at x and -x
+- This symmetry is the core of FRI folding
 
-### 第二步：建立方程組
+### Step 2: Establish System of Equations
 
-將 -x 代入同一個公式：
+Substituting -x into the same formula:
 
 P(-x) = G((-x)²) + (-x) · H((-x)²)
 
 P(-x) = G(x²) - x · H(x²)
 
-現在我們有了一個關於 G(x²) 和 H(x²) 的二元一次方程組：
+Now we have a system of two linear equations in G(x²) and H(x²):
 
 ```
 P(x) = G(x²) + x · H(x²)    ...(1)
 P(-x) = G(x²) - x · H(x²)   ...(2)
 ```
 
-### 第三步：解出偶部和奇部
+### Step 3: Solve for Even and Odd Parts
 
-通過簡單的加減法，我們可以**唯一地解出** G(x²) 和 H(x²)：
+Through simple addition and subtraction, we can **uniquely solve** for G(x²) and H(x²):
 
-**解出偶部：** (1) + (2)
+**Solve for even part:** (1) + (2)
 
 P(x) + P(-x) = 2 · G(x²) 
 
 ⇒ G(x²) = [P(x) + P(-x)]/2
 
-**解出奇部：** (1) - (2)
+**Solve for odd part:** (1) - (2)
 
 P(x) - P(-x) = 2x · H(x²) 
 
 ⇒ H(x²) = [P(x) - P(-x)]/(2x)
 
-### 第四步：引入隨機挑戰值
+### Step 4: Introduce Random Challenge Value
 
-在 FRI 協議中，Verifier 會提供一個隨機挑戰值 α。Prover 使用這個挑戰值來構造新的多項式：
+In the FRI protocol, the Verifier provides a random challenge value α. The Prover uses this challenge value to construct a new polynomial:
 
 P_next(x²) = G(x²) + α · H(x²)
 
-**為什麼需要挑戰值 α？**
-1. **防止作弊**：如果沒有 α，Prover 可能提供假的 G 和 H
-2. **隨機性**：α 的隨機性確保 Prover 無法預先準備假證明
-3. **唯一性**：每個隨機的 α 都會產生不同的線性組合
+**Why do we need challenge value α?**
+1. **Prevent cheating**: Without α, the Prover might provide fake G and H
+2. **Randomness**: The randomness of α ensures the Prover cannot prepare fake proofs in advance
+3. **Uniqueness**: Each random α produces a different linear combination
 
-### 第五步：得到 FRI 摺疊的核心關係式
+### Step 5: Derive FRI Folding Core Relation
 
-將前面的結果代入：
+Substituting the previous results:
 
 **P_next(x²) = [P(x) + P(-x)]/2 + α · [P(x) - P(-x)]/(2x)**
 
-這就是 **FRI 摺疊的核心關係式**！
+This is the **FRI folding core relation**!
 
-### 第六步：驗證過程的數學意義
+### Step 6: Mathematical Meaning of Verification Process
 
-**Verifier 的邏輯：**
-1. 如果 Prover 誠實，那麼提供的 P(x)、P(-x) 和 P_next(x²) 應該滿足上述關係式
-2. 通過隨機抽查，Verifier 可以以高概率檢測到不誠實的 Prover
-3. 多輪摺疊後，最終會得到一個常數多項式，非常容易驗證
+**Verifier's Logic:**
+1. If the Prover is honest, then the provided P(x), P(-x) and P_next(x²) should satisfy the above relation
+2. Through random sampling, the Verifier can detect dishonest Provers with high probability
+3. After multiple rounds of folding, we eventually get a constant polynomial, which is very easy to verify
 
-**關鍵洞察：**
-- 每次摺疊都將多項式的度數減半
-- 定義域的大小也減半
-- 但驗證的安全性不會降低（因為有隨機挑戰值）
+**Key Insights:**
+- Each folding halves the polynomial degree
+- Domain size also halves
+- But verification security does not decrease (due to random challenge values)
 
-### 示例驗證
+### Example Verification
 
-以我們的例子為例，第一次摺疊：
+Using our example, first folding:
 - P(x) = x³ + 2x² + 3x + 4
-- 在點 x = 2 處：P(2) = 9，P(-2) = 15
-- 挑戰值：α = 5
+- At point x = 2: P(2) = 9, P(-2) = 15
+- Challenge value: α = 5
 
-計算：
+Calculate:
 P_next(4) = (9 + 15)/2 + 5 · (9 - 15)/(2 × 2) = 12 + 1 = 13
 
-這與我們直接計算 f₁(4) = 7 × 4 + 2 = 30 ≡ 13 (mod 17) 的結果完全一致！ 
+This exactly matches our direct calculation f₁(4) = 7 × 4 + 2 = 30 ≡ 13 (mod 17)!
