@@ -7,6 +7,121 @@ Plonky3 is a toolkit which provides a set of primitives, such as polynomial comm
 
 For questions or discussions, please use the Telegram group, [t.me/plonky3](https://t.me/plonky3).
 
+## 🎓 Plonky3 Learning Tutorial - Complete Guide to Zero-Knowledge Proof System Development
+
+### 📚 Tutorial Overview
+
+In the [`Plonky3/examples/`](https://github.com/yoyoj1023/Plonky3/tree/main/examples) directory, we have carefully designed a complete Plonky3 learning course containing **5 progressive exercises** that guide you from zero foundation to mastering zero-knowledge proof system development. Whether you are a cryptography newcomer or a blockchain developer, this tutorial will help you deeply understand the core principles and practical applications of STARK proof systems.
+
+### 🎯 Learning Curve Design
+
+Our learning path adopts a **theory and practice balanced** design philosophy, where each exercise builds upon the previous one:
+
+#### 📖 Stage 1: Theoretical Foundation Building
+**[Lesson 1: FRI Fundamentals and Manual Calculation Practice](examples/lesson1-fri-fundamental-and-example/)**
+- **Learning Objectives**: Deep understanding of the FRI (Fast Reed-Solomon Interactive Oracle Proof) protocol
+- **Core Content**:
+  - Mathematical principles of Polynomial Folding
+  - Practical applications of finite field arithmetic
+  - Verifier and Prover interaction mechanisms
+  - Complete manual verification examples (computing f(x) = x³ + 2x² + 3x + 4 in 𝔽₁₇)
+- **Skill Enhancement**: Build intuitive understanding of the underlying mathematics of zero-knowledge proofs
+- **Target Audience**: Learners who want to deeply understand the operational mechanisms of the FRI protocol
+
+#### 🧠 Stage 2: Conceptual Framework Mastery
+**[Lesson 2: Plonky3 Core Concepts Q&A Challenge](examples/lesson2-plonky3-concept/)**
+- **Learning Objectives**: Comprehensively master Plonky3's core concepts and terminology
+- **Core Content**:
+  - Design principles of AIR (Algebraic Intermediate Representation)
+  - Generation and verification of Execution Traces
+  - Critical role of FRI protocol in STARK
+  - Application scenarios for Recursive Proofs
+  - Advantages of Plonky3's modular architecture
+- **Learning Method**: 10 Q&A questions + 10 true/false questions, covering from basic definitions to advanced applications
+- **Skill Enhancement**: Form a complete zero-knowledge proof knowledge system
+- **Target Audience**: Developers preparing to deeply learn Plonky3 implementation
+
+#### 💻 Stage 3: Implementation Capability Development
+**[Lesson 3: Fibonacci Sequence Prover Implementation](examples/lesson3-fibonacci-prover/)**
+- **Learning Objectives**: Master the basic Plonky3 development workflow and implement the first complete proof system
+- **Core Content**:
+  - Define Plonky3 "Chip" components
+  - Generate Execution Traces
+  - Implement AIR constraints (initial constraints + transition constraints)
+  - Generate and verify STARK proofs
+- **Implementation Focus**:
+  - Design AIR specification for Fibonacci sequence
+  - Handle boundary constraints (F(0)=0, F(1)=1)
+  - Implement state transition constraints (F(n) = F(n-1) + F(n-2))
+- **Skill Enhancement**: Acquire basic zero-knowledge proof system development capabilities
+- **Target Audience**: Programmers with Rust foundation who want to get started with Plonky3 development
+
+#### 🔧 Stage 4: Advanced System Architecture
+**[Lesson 4: Universal Adder Processor Implementation](examples/lesson4-universal-adder/)**
+- **Learning Objectives**: Learn to handle state management and configurable operations, laying the foundation for ZK-VM construction
+- **Core Content**:
+  - Design CPU models with multiple registers
+  - Use Selectors to implement dynamic operation selection
+  - Implement one-hot encoding and constraint verification
+  - Handle complex state transition logic
+- **Implementation Focus**:
+  - State management of 4 registers
+  - Complete implementation of ADD instruction
+  - Constraint design for selector fields
+  - Generate execution traces from instruction sequences
+- **Skill Enhancement**: Master zero-knowledge proof design for complex state systems
+- **Target Audience**: Advanced developers who want to build virtual machine proof systems
+
+#### 🚀 Stage 5: Advanced System Design
+**[Lesson 5: Arithmetic Logic Unit (ALU) Implementation](examples/lesson5-adder-subtractor-alu/)**
+- **Learning Objectives**: Master conditional logic and opcode handling, implement complete ALU system
+- **Core Content**:
+  - Design of Operation Selectors
+  - Implementation of Conditional Constraints
+  - Unified processing framework for multiple instruction types
+  - Modular extension of existing systems
+- **Implementation Focus**:
+  - Support both ADD and SUB instructions simultaneously
+  - Design opcode selection mechanisms
+  - Implement conditional algebraic constraints
+  - Handle complex state transition logic
+- **Skill Enhancement**: Acquire the ability to design complex zero-knowledge virtual machines
+- **Target Audience**: Professional developers preparing to develop production-grade ZK-VM systems
+
+### 📈 Learning Outcomes and Capability Advancement
+
+After completing this tutorial, you will be able to:
+
+🎯 **Theoretical Mastery**
+- Deep understanding of FRI protocol mathematical principles and implementation details
+- Master the complete workflow of STARK proof systems
+- Understand the cryptographic foundations of zero-knowledge proofs
+
+🛠️ **Implementation Capabilities**
+- Independently design and implement AIR specifications
+- Proficiently use the Plonky3 framework to develop proof systems
+- Handle complex state management and constraint design
+
+🏗️ **System Design**
+- Design scalable zero-knowledge virtual machine architectures
+- Implement efficient proof generation and verification processes
+- Master modular system design principles
+
+🚀 **Practical Applications**
+- Develop ZK-Rollup systems for blockchain scaling solutions
+- Implement privacy-preserving computational verification schemes
+- Build high-performance zero-knowledge proof infrastructure
+
+### 🎓 Getting Started
+
+We recommend following the learning sequence: Lesson 1 → Lesson 2 → Lesson 3 → Lesson 4 → Lesson 5. Each exercise contains detailed documentation, implementation guidance, and reflection questions to ensure you can solidly grasp every concept.
+
+📝 **Learning Recommendations**:
+- For theoretical exercises, please calculate by hand to build mathematical intuition
+- For programming exercises, please write code yourself and avoid direct copying
+- After completing each exercise, consider possibilities for extended applications
+- Recommend maintaining learning notes to record important concepts and implementation details
+
 
 ## Status
 
